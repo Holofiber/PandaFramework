@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading;
+using DummyClient;
 using Fleck;
 
 
@@ -9,6 +11,7 @@ namespace DummyServer
     {
 
         static WebSocketServer server;
+        private static List<ClientConnection> clientConnectionsList = new List<ClientConnection>();
 
         static void Main(string[] args)
         {
@@ -28,19 +31,11 @@ namespace DummyServer
             server = new WebSocketServer("ws://0.0.0.0:8181");
             server.Start(socket =>
             {
-                socket.OnOpen = () => Console.WriteLine("Open!");
-                socket.OnClose = () => Console.WriteLine("Close!");
-                socket.OnMessage = message =>
-                {
-                    Console.WriteLine($"From client msg: {message}");
-                    socket.Send($"Reply: {message}");
-                };
-                socket.OnError = ex => Console.WriteLine(ex);
-                
-            });
-
-
-            
+                var clientConnection = new ClientConnection(socket);
+                clientConnectionsList.Add(clientConnection);
+            });            
         }
+
+        
     }
 }

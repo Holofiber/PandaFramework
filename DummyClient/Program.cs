@@ -6,6 +6,7 @@ namespace DummyClient
 {
     class Program
     {
+        public static WebSocket ws;
         static async Task Main(string[] args)
         {
             ConsoleHelper.SetWindowPosition(0, 510, 979, 512);
@@ -31,6 +32,13 @@ namespace DummyClient
                 Console.WriteLine(e);
             }
 
+            while (true)
+            {
+                var mesg = Console.ReadLine();
+                ws.Send(mesg);
+                
+            }
+
 
             Console.ReadKey(true);
         }
@@ -38,7 +46,8 @@ namespace DummyClient
         private static async Task ConnectToServer()
         {
             Console.WriteLine("Try to connect");
-            var ws = new WebSocket("ws://127.0.0.1:8181");
+            ws = new WebSocket("ws://127.0.0.1:8181");
+           // ws = new WebSocket("wss://stream.binance.com/stream?streams=btcusdt@kline_1h");
 
             ws.MessageReceived += Ws_MessageReceived;
             ws.Opened += Ws_Opened;
@@ -48,8 +57,7 @@ namespace DummyClient
 
             await ws.OpenAsync();
             
-            ws.Send("hello");
-            
+          //  ws.Send("hello");
             Console.WriteLine("message was sent");
         }
 
@@ -83,3 +91,12 @@ namespace DummyClient
         }
     }
 }
+
+/*
+ Reconnection
+ try to connection
+ independent server
+ reconnect client after restarting server
+ 
+  */
+ 
