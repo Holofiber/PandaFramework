@@ -7,7 +7,12 @@ namespace DummyClient
     class Program
     {
         public static WebSocket ws;
-        static async Task Main(string[] args)
+
+        public static void Main(string[] args)
+        {
+            Run();
+        }
+        static async Task Run()
         {
             ConsoleHelper.SetWindowPosition(0, 510, 979, 512);
             Console.Title = "Client";
