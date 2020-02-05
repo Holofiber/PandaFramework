@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Text;
 using Fleck;
+using Console = Colorful.Console;
 
 namespace DummyClient
 {
@@ -21,7 +23,7 @@ namespace DummyClient
 
         private void HandleMessage(string message)
         {
-            Console.WriteLine($"From client msg: {message}");
+            Console.WriteLine($"From client msg: {message}", color:Color.Green);
 
             switch (message)
             {
