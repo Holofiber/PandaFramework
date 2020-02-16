@@ -25,17 +25,36 @@ namespace DummyClient
         {
             Console.WriteLine($"From client msg: {message}", color:Color.Green);
 
-            switch (message)
+            if (message == "time")
             {
-                case "time":
-                    Socket.Send($"Server time: {DateTime.Now}");
-                    break;
-                case "ping":
-                    Socket.Send("pong");
-                    break;
-                default:
-                    Socket.Send("Unknown message");
-                    break;
+                Socket.Send($"Server time: {DateTime.Now}");
+            }
+            else if (message == "ping")
+            {
+                Socket.Send("pong");
+            }
+            else if (message.StartsWith("div"))
+            {
+                try
+                {
+                    var tokens = message.Split();
+
+                    var a = tokens[1];
+                    var b = tokens[2];
+                    Int32.TryParse(a, out int resA);
+                    Int32.TryParse(b, out int resB);
+                    var div = resA / resB;
+
+                    Socket.Send(div.ToString());
+                }
+                catch (Exception e)
+                {
+                    Socket.Send(e.Message +"\n "+ e.StackTrace);
+                }
+            }
+            else if (message == default)
+            {
+                Socket.Send("Unknown message");
             }
         }
     }

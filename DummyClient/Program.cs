@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Drawing;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Timers;
 using WebSocket4Net;
@@ -9,9 +10,8 @@ namespace DummyClient
 {
     class Program
     {
-        public static WebSocket ws;
-        public static bool IsConnected;
-        private static System.Timers.Timer aTimer;
+        private static readonly Api api = new Api();
+
 
         public static void Main(string[] args)
         {
@@ -25,108 +25,66 @@ namespace DummyClient
 
             Console.WriteLine("Press any key to connect");
             Console.ReadKey(true);
+            
+            api.ConnectToServer();
+            api.OnServerTime += ApiOnServerTime;
+            api.OnShowMessage += ApiOnOnShowMessage;
 
 
-            var task = Task.Run(() =>
-            {
-                return ConnectToServer();
-            });
 
 
-            try
-            {
-                task.Wait();
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-            }
+            Task.Run(() => RunCommandLoop());
 
             while (true)
             {
-                var mesg = Console.ReadLine();
-                ws.Send(mesg);
-                
+                Thread.Sleep(1000);
             }
-
 
             Console.ReadKey(true);
         }
 
-        private static async Task ConnectToServer()
+        private static void ApiOnOnShowMessage(object sender, string e)
         {
-            Console.WriteLine("Try to connect");
-            ws = new WebSocket("ws://127.0.0.1:8181");
-           // ws = new WebSocket("wss://stream.binance.com/stream?streams=btcusdt@kline_1h");
-
-            ws.MessageReceived += Ws_MessageReceived;
-            ws.Opened += Ws_Opened;
-            ws.Closed += Ws_Closed;
-            ws.DataReceived += Ws_DataReceived;
-            ws.Error += Ws_Error;
-
-            await ws.OpenAsync();
-            
-          //  ws.Send("hello");
-            Console.WriteLine("message was sent");
+            Console.WriteLine("Unknown message from server:", Color.Red); 
+            Console.Write(e, Color.AliceBlue);
         }
 
-        private static void Ws_Opened(object sender, EventArgs e)
+        private static void RunCommandLoop()
         {
-            IsConnected = true;
-            Console.WriteLine("Opened");
+            try
+            {
+                while (true)
+                {
+                    var command = System.Console.ReadLine();
+
+                    if (command == "time")
+                    {
+                        api.SendServerTimeRequest();
+                    }
+
+                    else if (command.StartsWith("div"))
+                    {
+                        var tokens = command.Split();
+
+                        var a = tokens[1];
+                        var b = tokens[2];
+                        Int32.TryParse(a, out int numberA);
+                        Int32.TryParse(b, out int numberB);
+
+                        api.DivNumbers(numberA, numberB);
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                System.Console.WriteLine(e);
+                throw;
+            }
         }
 
-
-        private static void Ws_Error(object sender, SuperSocket.ClientEngine.ErrorEventArgs e)
+        private static void ApiOnServerTime(object sender, string e)
         {
-            Console.WriteLine($"error: {e.Exception.ToString()}", Color.Red);
-            
-            
-        }
-
-        private static void Ws_DataReceived(object sender, DataReceivedEventArgs e)
-        {
-            Console.WriteLine("data received", Color.Tomato);
-            
-        }
-
-        private static void Ws_Closed(object sender, EventArgs e)
-        {
-            IsConnected = false;
-            Console.WriteLine("closed", Color.Red);
-            TryToReconnect();
-        }
-
-        private static void TryToReconnect()
-        {
-            SetTimer();
-
-            
-
-        }
-
-        private static void Ws_MessageReceived(object sender, MessageReceivedEventArgs e)
-        {
-            Console.WriteLine("Server said: " + e.Message, Color.Green);
-        }
-        private static void SetTimer()
-        {
-            // Create a timer with a two second interval.
-            aTimer = new System.Timers.Timer(2000);
-            // Hook up the Elapsed event for the timer. 
-            aTimer.Elapsed += OnTimedEvent;
-            aTimer.AutoReset = true;
-            aTimer.Enabled = true;
-            
-            aTimer.Stop();
-        }
-
-        private static void OnTimedEvent(object sender, ElapsedEventArgs e)
-        {
-            new WebSocket("ws://127.0.0.1:8181");
-            Console.WriteLine("The Elapsed event was raised at {0:HH:mm:ss.fff}",
-                e.SignalTime);
+            Console.WriteLine(e, Color.Gold);
         }
     }
 }
