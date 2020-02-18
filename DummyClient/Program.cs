@@ -1,51 +1,37 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Timers;
-using WebSocket4Net;
 using Console = Colorful.Console;
 
 namespace DummyClient
 {
-    class Program
+    internal class Program
     {
         private static readonly Api api = new Api();
 
-
         public static void Main(string[] args)
-        {
-            Run();
-        }
-        static async Task Run()
         {
             ConsoleHelper.SetWindowPosition(0, 510, 979, 512);
             Console.Title = "Client";
 
-
             Console.WriteLine("Press any key to connect");
             Console.ReadKey(true);
-            
+
             api.ConnectToServer();
             api.OnServerTime += ApiOnServerTime;
             api.OnShowMessage += ApiOnOnShowMessage;
 
 
-
-
             Task.Run(() => RunCommandLoop());
 
-            while (true)
-            {
-                Thread.Sleep(1000);
-            }
-
-            Console.ReadKey(true);
+            while (true) Thread.Sleep(1000);
         }
 
         private static void ApiOnOnShowMessage(object sender, string e)
         {
-            Console.WriteLine("Unknown message from server:", Color.Red); 
+            Console.WriteLine("Unknown message from server:", Color.Red);
             Console.Write(e, Color.AliceBlue);
         }
 
@@ -68,8 +54,8 @@ namespace DummyClient
 
                         var a = tokens[1];
                         var b = tokens[2];
-                        Int32.TryParse(a, out int numberA);
-                        Int32.TryParse(b, out int numberB);
+                        int.TryParse(a, out var numberA);
+                        int.TryParse(b, out var numberB);
 
                         api.DivNumbers(numberA, numberB);
                     }
@@ -96,4 +82,3 @@ namespace DummyClient
  reconnect client after restarting server
  
   */
- 

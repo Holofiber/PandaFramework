@@ -4,6 +4,8 @@ using System.Drawing;
 using System.Text;
 using System.Threading.Tasks;
 using System.Timers;
+using DummyServer;
+using Newtonsoft.Json;
 using WebSocket4Net;
 using Console = Colorful.Console;
 
@@ -14,6 +16,7 @@ namespace DummyClient
         private WebSocket webSocket;
         public bool IsConnected;
         private Timer aTimer;
+        private int i = 0;
 
         public Api()
         {
@@ -72,7 +75,10 @@ namespace DummyClient
 
         private void Ws_MessageReceived(object sender, MessageReceivedEventArgs e)
         {
-            if (e.Message.StartsWith("Server time:"))
+
+            var request = JsonConvert.DeserializeObject<Request>(e.Message);
+
+            if (request.Command == ValidCommand.ServerTime)
             {
                 DoOnServerTime(e.Message);
             }
@@ -117,13 +123,36 @@ namespace DummyClient
 
         public void SendServerTimeRequest()
         {
-            webSocket.Send("time");
+            var request = new Request()
+            {
+                Command = ValidCommand.ServerTime,
+            };
+
+            SendMessage(request);
         }
 
         public void DivNumbers(int a, int b)
         {
             var message = $"div {a} {b}";
-            webSocket.Send(message);
+            var request = new Request()
+            {
+                Command = ValidCommand.Division,
+                Message = message
+            };
+
+            SendMessage(request);
+        }
+
+        private int GetUniqeId()
+        {
+            return i++;
+        }
+
+        private void SendMessage(Request request)
+        {
+            request.ID = GetUniqeId();
+            var json = JsonConvert.SerializeObject(request);
+            webSocket.Send(json);
         }
     }
 }

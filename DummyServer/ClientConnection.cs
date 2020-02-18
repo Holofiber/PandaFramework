@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Text;
+using DummyServer;
 using Fleck;
+using Newtonsoft.Json;
 using Console = Colorful.Console;
 
 namespace DummyClient
@@ -23,21 +25,32 @@ namespace DummyClient
 
         private void HandleMessage(string message)
         {
-            Console.WriteLine($"From client msg: {message}", color:Color.Green);
+            var request = JsonConvert.DeserializeObject<Request>(message);
+            System.Console.WriteLine($"[{request.ID}] [{request.Command}] ", Color.Cornsilk);
 
-            if (message == "time")
+            if (request.Command == ValidCommand.ServerTime)
             {
-                Socket.Send($"Server time: {DateTime.Now}");
+                var r = new Request()
+                {
+                    Command = ValidCommand.ServerTime,
+                    Message = $"Server time: {DateTime.Now}"
+                };
+                SendMessage(r);
             }
-            else if (message == "ping")
+            else if (request.Command == ValidCommand.Ping)
             {
-                Socket.Send("pong");
+                var r = new Request()
+                {
+                    Command = ValidCommand.Pong,
+                    Message = "pong"
+                };
+                SendMessage(r);
             }
-            else if (message.StartsWith("div"))
+            else if (request.Command == ValidCommand.Division)
             {
                 try
                 {
-                    var tokens = message.Split();
+                    var tokens = request.Message.Split();
 
                     var a = tokens[1];
                     var b = tokens[2];
@@ -52,10 +65,22 @@ namespace DummyClient
                     Socket.Send(e.Message +"\n "+ e.StackTrace);
                 }
             }
-            else if (message == default)
+            else 
             {
-                Socket.Send("Unknown message");
+                var r = new Request()
+                {
+                    Command = ValidCommand.Uncknown,
+                };
+                SendMessage(r);
             }
+        }
+
+        private int i = 0;
+        private void SendMessage(Request request)
+        {
+            request.ID = i++;
+            var json = JsonConvert.SerializeObject(request);
+            Socket.Send(json);
         }
     }
 }
