@@ -11,22 +11,22 @@ namespace DummyClient
     {
         private static readonly Api api = new Api();
 
-        public static void Main(string[] args)
+        public static async Task Main(string[] args)
         {
-            ConsoleHelper.SetWindowPosition(0, 510, 979, 512);
+           // ConsoleHelper.SetWindowPosition(0, 510, 979, 512);
             Console.Title = "Client";
 
             Console.WriteLine("Press any key to connect");
             Console.ReadKey(true);
 
-            api.ConnectToServer();
             api.OnServerTime += ApiOnServerTime;
             api.OnShowMessage += ApiOnOnShowMessage;
+            await api.ConnectToServer();
 
 
-            Task.Run(() => RunCommandLoop());
+           await Task.Run(() => RunCommandLoop());
 
-            while (true) Thread.Sleep(1000);
+           // while (true) Thread.Sleep(1000);
         }
 
         private static void ApiOnOnShowMessage(object sender, string e)
@@ -35,7 +35,7 @@ namespace DummyClient
             Console.Write(e, Color.AliceBlue);
         }
 
-        private static void RunCommandLoop()
+        private static async Task RunCommandLoop()
         {
             try
             {
@@ -46,25 +46,21 @@ namespace DummyClient
                     if (command == "time")
                     {
                         api.SendServerTimeRequest();
+                        continue;
                     }
 
-                    else if (command.StartsWith("div"))
-                    {
-                        var tokens = command.Split();
 
-                        var a = tokens[1];
-                        var b = tokens[2];
-                        int.TryParse(a, out var numberA);
-                        int.TryParse(b, out var numberB);
+                    var changeResult=await api.WaitForFolderChange(command);
 
-                        api.DivNumbers(numberA, numberB);
-                    }
+                    System.Console.WriteLine("Folder was changed with result" + changeResult);
+
+
                 }
             }
             catch (Exception e)
             {
                 System.Console.WriteLine(e);
-                throw;
+               
             }
         }
 

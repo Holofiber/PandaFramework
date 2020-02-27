@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 using System.Timers;
@@ -65,6 +66,15 @@ namespace DummyClient
         {
             IsConnected = false;
             Colorful.Console.WriteLine("closed", Color.Red);
+
+
+            foreach (var taskCompletionSource in _waitForResp)
+            {
+                taskCompletionSource.Value.SetException(new Exception());
+
+            }
+            _waitForResp.Clear();
+
             TryToReconnect();
         }
 
@@ -73,12 +83,24 @@ namespace DummyClient
             SetTimer();
         }
 
+
+        Dictionary<Guid,TaskCompletionSource<object>> _waitForResp = new Dictionary<Guid, TaskCompletionSource<object>>();
+
         private void Ws_MessageReceived(object sender, MessageReceivedEventArgs e)
         {
 
-            var request = JsonConvert.DeserializeObject<Request>(e.Message);
+            var response = JsonConvert.DeserializeObject<Request>(e.Message);
 
-            if (request.Command == ValidCommand.ServerTime)
+            if (_waitForResp.TryGetValue(response.ID, out var tcs))
+            {
+                tcs.SetResult(null);
+                return;
+            }
+            
+
+
+
+            if (response.Command == ValidCommand.ServerTime)
             {
                 DoOnServerTime(e.Message);
             }
@@ -126,10 +148,35 @@ namespace DummyClient
             var request = new Request()
             {
                 Command = ValidCommand.ServerTime,
+                ID = Guid.NewGuid()
             };
 
             SendMessage(request);
         }
+
+
+        public async Task<FileSystemEventArgs> WaitForFolderChange(string path)
+        {
+            var request = new Request()
+            {
+                Command = ValidCommand.WaitForFolderChange,
+                Message = path,
+                ID = Guid.NewGuid()
+            };
+
+            var tcs = new TaskCompletionSource<object>();
+            _waitForResp.Add(request.ID, tcs);
+            SendMessage(request);
+
+            //disconnected
+
+            await tcs.Task;
+
+            return null;
+        }
+
+
+
 
         public void DivNumbers(int a, int b)
         {

@@ -3,15 +3,13 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.28307.645
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CryptoRypto", "CryptoRypto\CryptoRypto.csproj", "{C9C8A0E3-F2EA-4F9D-94AB-53B33D4F4AB4}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ChatServer", "ChatServer", "{FD1C4A7E-2936-4E27-A980-EF0792B60F12}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DummyServer", "DummyServer\DummyServer.csproj", "{65C1AA19-8C32-4ACD-959F-B82C9C8C050F}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DummyClient", "DummyClient\DummyClient.csproj", "{7E2E968E-01D4-479D-BF50-1D8DADD136C1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Library", "Library\Library.csproj", "{3375A2CF-ED3B-438A-8EEA-9C7506C34182}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Library", "Library\Library.csproj", "{3375A2CF-ED3B-438A-8EEA-9C7506C34182}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -19,10 +17,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{C9C8A0E3-F2EA-4F9D-94AB-53B33D4F4AB4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{C9C8A0E3-F2EA-4F9D-94AB-53B33D4F4AB4}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{C9C8A0E3-F2EA-4F9D-94AB-53B33D4F4AB4}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{C9C8A0E3-F2EA-4F9D-94AB-53B33D4F4AB4}.Release|Any CPU.Build.0 = Release|Any CPU
 		{65C1AA19-8C32-4ACD-959F-B82C9C8C050F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{65C1AA19-8C32-4ACD-959F-B82C9C8C050F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{65C1AA19-8C32-4ACD-959F-B82C9C8C050F}.Release|Any CPU.ActiveCfg = Release|Any CPU

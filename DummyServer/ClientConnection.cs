@@ -69,7 +69,7 @@ namespace DummyClient
             {
                 var r = new Request()
                 {
-                    Command = ValidCommand.Uncknown,
+                    Command = ValidCommand.Unknown,
                 };
                 SendMessage(r);
             }

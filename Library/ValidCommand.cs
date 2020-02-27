@@ -6,6 +6,7 @@
        ServerTime,
        Ping,
        Pong,
-       Uncknown
+       Unknown,
+       WaitForFolderChange
     }
 }
