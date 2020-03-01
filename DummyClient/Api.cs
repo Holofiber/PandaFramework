@@ -34,7 +34,7 @@ namespace DummyClient
             webSocket.Closed += Ws_Closed;
             webSocket.DataReceived += Ws_DataReceived;
             webSocket.Error += Ws_Error;
-            
+
 
             await webSocket.OpenAsync();
 
@@ -84,7 +84,7 @@ namespace DummyClient
         }
 
 
-        Dictionary<Guid,TaskCompletionSource<object>> _waitForResp = new Dictionary<Guid, TaskCompletionSource<object>>();
+        Dictionary<Guid, TaskCompletionSource<object>> _waitForResp = new Dictionary<Guid, TaskCompletionSource<object>>();
 
         private void Ws_MessageReceived(object sender, MessageReceivedEventArgs e)
         {
@@ -96,7 +96,7 @@ namespace DummyClient
                 tcs.SetResult(null);
                 return;
             }
-            
+
 
 
 
@@ -110,7 +110,7 @@ namespace DummyClient
             }
         }
 
-        public event EventHandler<string> OnShowMessage; 
+        public event EventHandler<string> OnShowMessage;
 
         private void DoShowMessage(string e)
         {
@@ -190,9 +190,9 @@ namespace DummyClient
             SendMessage(request);
         }
 
-        private int GetUniqeId()
+        private Guid GetUniqeId()
         {
-            return i++;
+            return Guid.NewGuid();
         }
 
         private void SendMessage(Request request)

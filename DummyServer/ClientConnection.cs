@@ -1,7 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Drawing;
-using System.Text;
+using System.IO;
 using DummyServer;
 using Fleck;
 using Newtonsoft.Json;
@@ -46,6 +45,16 @@ namespace DummyClient
                 };
                 SendMessage(r);
             }
+            else if (request.Command == ValidCommand.WaitForFolderChange)
+            {
+                string path = request.Message;
+                var id = request.ID;
+                using (FileSystemWatcher watcher = new FileSystemWatcher())
+                {
+                    watcher.Path = path;
+                    watcher.Changed += OnChanged;
+                }
+            }
             else if (request.Command == ValidCommand.Division)
             {
                 try
@@ -62,10 +71,10 @@ namespace DummyClient
                 }
                 catch (Exception e)
                 {
-                    Socket.Send(e.Message +"\n "+ e.StackTrace);
+                    Socket.Send(e.Message + "\n " + e.StackTrace);
                 }
             }
-            else 
+            else
             {
                 var r = new Request()
                 {
@@ -75,10 +84,14 @@ namespace DummyClient
             }
         }
 
-        private int i = 0;
+        private void OnChanged(object sender, FileSystemEventArgs e)
+        {
+            throw new NotImplementedException();
+        }
+
         private void SendMessage(Request request)
         {
-            request.ID = i++;
+            request.ID = Guid.NewGuid();
             var json = JsonConvert.SerializeObject(request);
             Socket.Send(json);
         }
