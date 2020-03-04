@@ -7,6 +7,7 @@
        Ping,
        Pong,
        Unknown,
-       WaitForFolderChange
+       WaitForFolderChange,
+       FolderChanged
     }
 }

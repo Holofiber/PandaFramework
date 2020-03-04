@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
+using System.Linq;
 using DummyServer;
 using Fleck;
 using Newtonsoft.Json;
@@ -11,6 +13,7 @@ namespace DummyClient
     class ClientConnection
     {
         public IWebSocketConnection Socket { get; }
+        public Dictionary<Guid, string> SubscribedCatalog = new Dictionary<Guid, string>();
 
         public ClientConnection(IWebSocketConnection socket)
         {
@@ -21,8 +24,9 @@ namespace DummyClient
 
             socket.OnError = ex => Console.WriteLine(ex);
         }
+       
 
-        private void HandleMessage(string message)
+        public void HandleMessage(string message)
         {
             var request = JsonConvert.DeserializeObject<Request>(message);
             System.Console.WriteLine($"[{request.ID}] [{request.Command}] ", Color.Cornsilk);
@@ -49,11 +53,23 @@ namespace DummyClient
             {
                 string path = request.Message;
                 var id = request.ID;
-                using (FileSystemWatcher watcher = new FileSystemWatcher())
-                {
-                    watcher.Path = path;
-                    watcher.Changed += OnChanged;
-                }
+                SubscribedCatalog.Add(id, path);
+
+                FileSystemWatcher watcher = new FileSystemWatcher();
+
+
+                watcher.Path = path;
+                watcher.NotifyFilter = NotifyFilters.LastAccess | NotifyFilters.LastWrite
+                                                                | NotifyFilters.FileName | NotifyFilters.DirectoryName;
+
+
+                watcher.Filter = "*.txt";
+                watcher.Changed += new FileSystemEventHandler(OnChanged);
+                watcher.Renamed += new RenamedEventHandler(OnChanged);
+                watcher.Created += new FileSystemEventHandler(OnCreated);
+                watcher.Deleted += new FileSystemEventHandler(OnCreated);
+                watcher.EnableRaisingEvents = true;
+                
             }
             else if (request.Command == ValidCommand.Division)
             {
@@ -84,9 +100,42 @@ namespace DummyClient
             }
         }
 
+        private void SomeHapens(string catalog)
+        {
+            List<Guid> listOfGuids = new List<Guid>();
+            foreach (var data in SubscribedCatalog)
+            {
+                if (data.Value == catalog)
+                {
+                    listOfGuids.Add(data.Key);
+                }
+            }
+
+            if (listOfGuids.Any())
+            {
+                foreach (var guid in listOfGuids)
+                {
+                    var r = new Request()
+                    {
+                        ID = guid,
+                        Message = catalog,
+                        Command = ValidCommand.FolderChanged
+                    };
+
+                    Socket.Send(JsonConvert.SerializeObject(r));
+                }
+            }
+
+        }
+
+        private void OnCreated(object sender, FileSystemEventArgs e)
+        {
+            SomeHapens(e.FullPath);
+        }
+
         private void OnChanged(object sender, FileSystemEventArgs e)
         {
-            throw new NotImplementedException();
+            SomeHapens(Path.GetDirectoryName(e.FullPath));
         }
 
         private void SendMessage(Request request)

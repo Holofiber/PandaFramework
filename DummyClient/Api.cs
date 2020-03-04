@@ -2,9 +2,11 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Timers;
+using System.Xml.Serialization;
 using DummyServer;
 using Newtonsoft.Json;
 using WebSocket4Net;
@@ -83,8 +85,10 @@ namespace DummyClient
             SetTimer();
         }
 
-
-        Dictionary<Guid, TaskCompletionSource<object>> _waitForResp = new Dictionary<Guid, TaskCompletionSource<object>>();
+       
+            static Dictionary<Guid, TaskCompletionSource<object>> _waitForResp =
+                new Dictionary<Guid, TaskCompletionSource<object>>();
+        
 
         private void Ws_MessageReceived(object sender, MessageReceivedEventArgs e)
         {
@@ -96,13 +100,17 @@ namespace DummyClient
                 tcs.SetResult(null);
                 return;
             }
-
-
-
-
             if (response.Command == ValidCommand.ServerTime)
             {
                 DoOnServerTime(e.Message);
+            }
+
+            if (response.Command == ValidCommand.FolderChanged)
+            {
+              var t =  _waitForResp.Where(x=>x.Key == response.ID).FirstOrDefault();
+                t.Value.SetResult(response.Message);
+
+                Console.WriteLine($"{response.Message} was changed");
             }
             else
             {
@@ -160,14 +168,15 @@ namespace DummyClient
             var request = new Request()
             {
                 Command = ValidCommand.WaitForFolderChange,
-                Message = path,
+                Message = $@"C:\{path}",
                 ID = Guid.NewGuid()
             };
 
             var tcs = new TaskCompletionSource<object>();
+            
             _waitForResp.Add(request.ID, tcs);
             SendMessage(request);
-
+            tcs.SetResult("a");
             //disconnected
 
             await tcs.Task;
@@ -175,6 +184,10 @@ namespace DummyClient
             return null;
         }
 
+        public void FolderChanged(Request r)
+        {
+           Console.WriteLine($"{r.ID} {r.Message}", Color.Green);
+        }
 
 
 

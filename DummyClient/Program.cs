@@ -49,12 +49,13 @@ namespace DummyClient
                         continue;
                     }
 
+                    if (command.StartsWith("subscribe") )
+                    {
+                        var tokens = command.Split(" ");
+                        var changeResult = await api.WaitForFolderChange(tokens[1]);
 
-                    var changeResult=await api.WaitForFolderChange(command);
-
-                    System.Console.WriteLine("Folder was changed with result" + changeResult);
-
-
+                        Console.WriteLine("Folder was changed with result" + changeResult);
+                    }
                 }
             }
             catch (Exception e)
