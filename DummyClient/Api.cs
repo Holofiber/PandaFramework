@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using System.Timers;
 using System.Xml.Serialization;
 using DummyServer;
+using Library;
 using Newtonsoft.Json;
 using WebSocket4Net;
 using Console = Colorful.Console;
@@ -86,8 +87,8 @@ namespace DummyClient
         }
 
        
-            static Dictionary<Guid, TaskCompletionSource<object>> _waitForResp =
-                new Dictionary<Guid, TaskCompletionSource<object>>();
+            static Dictionary<Guid, TaskCompletionSource<FileSystemEvent>> _waitForResp =
+                new Dictionary<Guid, TaskCompletionSource<FileSystemEvent>>();
         
 
         private void Ws_MessageReceived(object sender, MessageReceivedEventArgs e)
@@ -95,11 +96,11 @@ namespace DummyClient
 
             var response = JsonConvert.DeserializeObject<Request>(e.Message);
 
-            if (_waitForResp.TryGetValue(response.ID, out var tcs))
-            {
-                tcs.SetResult(null);
-                return;
-            }
+            //if (_waitForResp.TryGetValue(response.ID, out var tcs))
+            //{
+            //    tcs.SetResult(null);
+            //    return;
+            //}
             if (response.Command == ValidCommand.ServerTime)
             {
                 DoOnServerTime(e.Message);
@@ -108,7 +109,9 @@ namespace DummyClient
             if (response.Command == ValidCommand.FolderChanged)
             {
               var t =  _waitForResp.Where(x=>x.Key == response.ID).FirstOrDefault();
-                t.Value.SetResult(response.Message);
+              
+              var res = JsonConvert.DeserializeObject<FileSystemEvent>(response.Object.ToString());
+                t.Value.SetResult(res);
 
                 Console.WriteLine($"{response.Message} was changed");
             }
@@ -163,7 +166,7 @@ namespace DummyClient
         }
 
 
-        public async Task<FileSystemEventArgs> WaitForFolderChange(string path)
+        public Task<FileSystemEvent> WaitForFolderChange(string path)
         {
             var request = new Request()
             {
@@ -171,17 +174,16 @@ namespace DummyClient
                 Message = $@"C:\{path}",
                 ID = Guid.NewGuid()
             };
-
-            var tcs = new TaskCompletionSource<object>();
             
+
+            var tcs = new TaskCompletionSource<FileSystemEvent>();
+            System.Console.WriteLine(request.ID);
             _waitForResp.Add(request.ID, tcs);
             SendMessage(request);
-            tcs.SetResult("a");
+          //  tcs.SetResult("a");
             //disconnected
 
-            await tcs.Task;
-
-            return null;
+            return tcs.Task;
         }
 
         public void FolderChanged(Request r)
@@ -210,7 +212,9 @@ namespace DummyClient
 
         private void SendMessage(Request request)
         {
+            if (request.ID==null)
             request.ID = GetUniqeId();
+
             var json = JsonConvert.SerializeObject(request);
             webSocket.Send(json);
         }

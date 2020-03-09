@@ -10,6 +10,6 @@ namespace DummyServer
         public Guid ID { get; set; }
         public ValidCommand Command { get; set; }
         public string Message { get; set; }
-        public List<string> Object { get; set; }
+        public object Object { get; set; }
     }
 }

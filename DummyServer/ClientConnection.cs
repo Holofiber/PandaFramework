@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using DummyServer;
 using Fleck;
+using Library;
 using Newtonsoft.Json;
 using Console = Colorful.Console;
 
@@ -28,6 +29,7 @@ namespace DummyClient
 
         public void HandleMessage(string message)
         {
+            System.Console.WriteLine(message);
             var request = JsonConvert.DeserializeObject<Request>(message);
             System.Console.WriteLine($"[{request.ID}] [{request.Command}] ", Color.Cornsilk);
 
@@ -100,12 +102,12 @@ namespace DummyClient
             }
         }
 
-        private void SomeHapens(string catalog)
+        private void SomeHapens(FileSystemEventArgs e)
         {
             List<Guid> listOfGuids = new List<Guid>();
             foreach (var data in SubscribedCatalog)
             {
-                if (data.Value == catalog)
+                if (data.Value == Path.GetDirectoryName(e.FullPath))
                 {
                     listOfGuids.Add(data.Key);
                 }
@@ -113,13 +115,23 @@ namespace DummyClient
 
             if (listOfGuids.Any())
             {
+
+
                 foreach (var guid in listOfGuids)
                 {
+                    FileSystemEvent fileSystemEvent = new FileSystemEvent
+                    {
+                        FileName = e.Name,
+                        FullPath = e.FullPath,
+                        ChangesType = e.ChangeType
+                    };
+
                     var r = new Request()
                     {
                         ID = guid,
-                        Message = catalog,
-                        Command = ValidCommand.FolderChanged
+                        Message = JsonConvert.SerializeObject(fileSystemEvent),
+                        Command = ValidCommand.FolderChanged,
+                        Object = fileSystemEvent
                     };
 
                     Socket.Send(JsonConvert.SerializeObject(r));
@@ -130,12 +142,12 @@ namespace DummyClient
 
         private void OnCreated(object sender, FileSystemEventArgs e)
         {
-            SomeHapens(e.FullPath);
+            SomeHapens(e);
         }
 
         private void OnChanged(object sender, FileSystemEventArgs e)
         {
-            SomeHapens(Path.GetDirectoryName(e.FullPath));
+            SomeHapens(e);
         }
 
         private void SendMessage(Request request)
