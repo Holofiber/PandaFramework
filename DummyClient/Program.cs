@@ -49,6 +49,12 @@ namespace DummyClient
                         continue;
                     }
 
+                    if (command == "ping")
+                    {
+                        api.SendServerPing();
+                        continue;
+                    }
+
                     if (command.StartsWith("subscribe") )
                     {
                         var tokens = command.Split(" ");

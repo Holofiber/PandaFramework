@@ -8,6 +8,7 @@
        Pong,
        Unknown,
        WaitForFolderChange,
+       UnsubscribeFolder,
        FolderChanged
     }
 }

@@ -218,5 +218,15 @@ namespace DummyClient
             var json = JsonConvert.SerializeObject(request);
             webSocket.Send(json);
         }
+
+        public void SendServerPing()
+        {
+            var request = new Request()
+            {
+                Command = ValidCommand.Ping,
+            };
+
+            SendMessage(request);
+        }
     }
 }
