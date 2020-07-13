@@ -48,6 +48,11 @@ namespace DummyClient
         private void Ws_Opened(object sender, EventArgs e)
         {
             IsConnected = true;
+            if (aTimer != null)
+            {
+                aTimer.Stop();
+                aTimer.Enabled = false;
+            }
             Colorful.Console.WriteLine("Opened");
         }
 
@@ -73,7 +78,7 @@ namespace DummyClient
 
             foreach (var taskCompletionSource in _waitForResp)
             {
-                taskCompletionSource.Value.SetException(new Exception());
+              //  taskCompletionSource.Value.SetException(new Exception());
 
             }
             _waitForResp.Clear();
@@ -131,21 +136,32 @@ namespace DummyClient
         private void SetTimer()
         {
             // Create a timer with a two second interval.
-            aTimer = new System.Timers.Timer(2000);
+            aTimer = new System.Timers.Timer(5000);
             // Hook up the Elapsed event for the timer. 
             aTimer.Elapsed += OnTimedEvent;
-            aTimer.AutoReset = true;
+            aTimer.AutoReset = false;
             aTimer.Enabled = true;
 
-            aTimer.Stop();
+           // aTimer.Stop();
         }
 
-        private void OnTimedEvent(object sender, ElapsedEventArgs e)
+        private async void OnTimedEvent(object sender, ElapsedEventArgs e)
         {
-            new WebSocket("ws://127.0.0.1:8181");
+            webSocket = new WebSocket("ws://127.0.0.1:8181");
+            webSocket.MessageReceived += Ws_MessageReceived;
+            webSocket.Opened += Ws_Opened;
+            webSocket.Closed += Ws_Closed;
+            webSocket.DataReceived += Ws_DataReceived;
+            webSocket.Error += Ws_Error;
+
+
+            await webSocket.OpenAsync();
+
             Console.WriteLine("The Elapsed event was raised at {0:HH:mm:ss.fff}",
                 e.SignalTime);
         }
+
+      
 
         public event EventHandler<string> OnServerTime;
 
