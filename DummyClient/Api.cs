@@ -1,12 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Timers;
-using System.Xml.Serialization;
 using DummyServer;
 using Library;
 using Newtonsoft.Json;
@@ -20,7 +17,6 @@ namespace DummyClient
         private WebSocket webSocket;
         public bool IsConnected;
         private Timer aTimer;
-        private int i = 0;
 
         public Api()
         {
@@ -28,10 +24,10 @@ namespace DummyClient
         }
 
         public async Task ConnectToServer()
-        {
+       {
             Colorful.Console.WriteLine("Try to connect");
-            // ws = new WebSocket("wss://stream.binance.com/stream?streams=btcusdt@kline_1h");
-
+            // ws = new WebSocket("wss://stream.binance.com/stream?streams=btcusdt@kline_1h"); //BINANCE stream
+           // webSocket = new WebSocket("ws://127.0.0.1:8181");
             webSocket.MessageReceived += Ws_MessageReceived;
             webSocket.Opened += Ws_Opened;
             webSocket.Closed += Ws_Closed;
@@ -39,10 +35,7 @@ namespace DummyClient
             webSocket.Error += Ws_Error;
 
 
-            await webSocket.OpenAsync();
-
-            //  ws.Send("hello");
-            Colorful.Console.WriteLine("message was sent");
+            await webSocket.OpenAsync();           
         }
 
         private void Ws_Opened(object sender, EventArgs e)
@@ -53,21 +46,18 @@ namespace DummyClient
                 aTimer.Stop();
                 aTimer.Enabled = false;
             }
-            Colorful.Console.WriteLine("Opened");
+            Colorful.Console.WriteLine("Opened", Color.Green);
         }
 
 
         private void Ws_Error(object sender, SuperSocket.ClientEngine.ErrorEventArgs e)
         {
             Colorful.Console.WriteLine($"error: {e.Exception.ToString()}", Color.Red);
-
-
         }
 
         private void Ws_DataReceived(object sender, DataReceivedEventArgs e)
         {
             Colorful.Console.WriteLine("data received", Color.Tomato);
-
         }
 
         private void Ws_Closed(object sender, EventArgs e)
@@ -75,7 +65,7 @@ namespace DummyClient
             IsConnected = false;
             Colorful.Console.WriteLine("closed", Color.Red);
 
-
+            //excepption if client lose subscribtion 
             foreach (var taskCompletionSource in _waitForResp)
             {
               //  taskCompletionSource.Value.SetException(new Exception());
@@ -90,7 +80,6 @@ namespace DummyClient
         {
             SetTimer();
         }
-
        
             static Dictionary<Guid, TaskCompletionSource<FileSystemEvent>> _waitForResp =
                 new Dictionary<Guid, TaskCompletionSource<FileSystemEvent>>();
@@ -113,12 +102,13 @@ namespace DummyClient
 
             if (response.Command == ValidCommand.FolderChanged)
             {
-              var t =  _waitForResp.Where(x=>x.Key == response.ID).FirstOrDefault();
-              
-              var res = JsonConvert.DeserializeObject<FileSystemEvent>(response.Object.ToString());
-                t.Value.SetResult(res);
 
-                Console.WriteLine($"{response.Message} was changed");
+
+
+
+                FileSystemEvent res = JsonConvert.DeserializeObject<FileSystemEvent>(response.Object.ToString());
+                DoOnFolderChanged(res);
+                
             }
             else
             {
@@ -135,39 +125,35 @@ namespace DummyClient
 
         private void SetTimer()
         {
-            // Create a timer with a two second interval.
-            aTimer = new System.Timers.Timer(5000);
+            int timerInterval = 2000;
+           
+            aTimer = new System.Timers.Timer(timerInterval);
             // Hook up the Elapsed event for the timer. 
             aTimer.Elapsed += OnTimedEvent;
             aTimer.AutoReset = false;
-            aTimer.Enabled = true;
-
-           // aTimer.Stop();
+            aTimer.Enabled = true;            
         }
 
         private async void OnTimedEvent(object sender, ElapsedEventArgs e)
-        {
-            webSocket = new WebSocket("ws://127.0.0.1:8181");
-            webSocket.MessageReceived += Ws_MessageReceived;
-            webSocket.Opened += Ws_Opened;
-            webSocket.Closed += Ws_Closed;
-            webSocket.DataReceived += Ws_DataReceived;
-            webSocket.Error += Ws_Error;
-
-
-            await webSocket.OpenAsync();
+        {        
+            await ConnectToServer();
 
             Console.WriteLine("The Elapsed event was raised at {0:HH:mm:ss.fff}",
                 e.SignalTime);
-        }
+        }      
 
-      
-
-        public event EventHandler<string> OnServerTime;
+        public event EventHandler<string> OnServerTime;       
 
         protected virtual void DoOnServerTime(string e)
         {
             OnServerTime?.Invoke(this, e);
+        }
+
+        public event EventHandler<FileSystemEvent> OnFolderChanged;
+
+        protected virtual void DoOnFolderChanged(FileSystemEvent e)
+        {
+            OnFolderChanged?.Invoke(this, e);
         }
 
         public void SendServerTimeRequest()
@@ -182,7 +168,7 @@ namespace DummyClient
         }
 
 
-        public Task<FileSystemEvent> WaitForFolderChange(string path)
+        public Task<FileSystemEvent> SubscribeFolderChange(string path)
         {
             var request = new Request()
             {
@@ -195,9 +181,7 @@ namespace DummyClient
             var tcs = new TaskCompletionSource<FileSystemEvent>();
             System.Console.WriteLine(request.ID);
             _waitForResp.Add(request.ID, tcs);
-            SendMessage(request);
-          //  tcs.SetResult("a");
-            //disconnected
+            SendMessage(request);          
 
             return tcs.Task;
         }

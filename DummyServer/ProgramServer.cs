@@ -15,7 +15,7 @@ namespace DummyServer
 
         static void Main(string[] args)
         {
-           // ConsoleHelper.SetWindowPosition(0, 0, 979, 512);
+            ConsoleHelper.SetWindowPosition(0, 0, 979, 512);
             Console.Title = $"Server {DateTime.Now}";
             StartServer();
 
@@ -34,8 +34,6 @@ namespace DummyServer
                 var clientConnection = new ClientConnection(socket);
                 clientConnectionsList.Add(clientConnection);
             });            
-        }
-
-        
+        }        
     }
 }

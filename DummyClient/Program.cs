@@ -1,5 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using Library;
+using System;
 using System.Drawing;
 using System.Threading;
 using System.Threading.Tasks;
@@ -13,20 +13,23 @@ namespace DummyClient
 
         public static async Task Main(string[] args)
         {
-           // ConsoleHelper.SetWindowPosition(0, 510, 979, 512);
-            Console.Title = "Client";
-
-            Console.WriteLine("Press any key to connect");
-            Console.ReadKey(true);
+            ConsoleHelper.SetWindowPosition(0, 510, 979, 512);
+            Console.Title = "Client";          
 
             api.OnServerTime += ApiOnServerTime;
             api.OnShowMessage += ApiOnOnShowMessage;
+            api.OnFolderChanged += ApiOnFolderChanged;
             await api.ConnectToServer();
+            
+            var task = Task.Factory.StartNew(() => RunCommandLoop(), TaskCreationOptions.LongRunning);
 
+            //while (true) Thread.Sleep(1000);
+        }
 
-           await Task.Run(() => RunCommandLoop());
-
-           // while (true) Thread.Sleep(1000);
+        private static void ApiOnFolderChanged(object sender, FileSystemEvent e)
+        {
+            Console.WriteLine("Folder was changed with result" + e);
+           // throw new NotImplementedException();
         }
 
         private static void ApiOnOnShowMessage(object sender, string e)
@@ -35,7 +38,7 @@ namespace DummyClient
             Console.Write(e, Color.AliceBlue);
         }
 
-        private static async Task RunCommandLoop()
+        private static void RunCommandLoop()
         {
             try
             {
@@ -58,9 +61,7 @@ namespace DummyClient
                     if (command.StartsWith("subscribe") )
                     {
                         var tokens = command.Split(" ");
-                        var changeResult = await api.WaitForFolderChange(tokens[1]);
-
-                        Console.WriteLine("Folder was changed with result" + changeResult);
+                        api.SubscribeFolderChange(tokens[1]);                        
                     }
                 }
             }

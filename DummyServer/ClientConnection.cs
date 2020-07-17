@@ -126,15 +126,15 @@ namespace DummyClient
                         ChangesType = e.ChangeType
                     };
 
-                    var r = new Request()
+                   /* var r = new Request()
                     {
                         ID = guid,
                         Message = JsonConvert.SerializeObject(fileSystemEvent),
                         Command = ValidCommand.FolderChanged,
                         Object = fileSystemEvent
-                    };
+                    };*/
 
-                    Socket.Send(JsonConvert.SerializeObject(r));
+                    Socket.Send(JsonConvert.SerializeObject(fileSystemEvent));
                 }
             }
 
