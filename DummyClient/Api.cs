@@ -20,14 +20,14 @@ namespace DummyClient
 
         public Api()
         {
-            webSocket = new WebSocket("ws://127.0.0.1:8181");
+           // webSocket = new WebSocket("ws://127.0.0.1:8181");
         }
 
-        public async Task ConnectToServer()
+        public async Task<bool> ConnectToServer()
        {
             Colorful.Console.WriteLine("Try to connect");
             // ws = new WebSocket("wss://stream.binance.com/stream?streams=btcusdt@kline_1h"); //BINANCE stream
-           // webSocket = new WebSocket("ws://127.0.0.1:8181");
+            webSocket = new WebSocket("ws://127.0.0.1:8181");
             webSocket.MessageReceived += Ws_MessageReceived;
             webSocket.Opened += Ws_Opened;
             webSocket.Closed += Ws_Closed;
@@ -35,7 +35,7 @@ namespace DummyClient
             webSocket.Error += Ws_Error;
 
 
-            await webSocket.OpenAsync();           
+            return await webSocket.OpenAsync();           
         }
 
         private void Ws_Opened(object sender, EventArgs e)

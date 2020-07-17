@@ -11,19 +11,24 @@ namespace DummyClient
     {
         private static readonly Api api = new Api();
 
-        public static async Task Main(string[] args)
+        public static void Main(string[] args)
         {
             ConsoleHelper.SetWindowPosition(0, 510, 979, 512);
-            Console.Title = "Client";          
+            Console.Title = "Client";
 
+            Task task = Run();
+
+            while (true) Thread.Sleep(1000);
+        }
+
+        private static async Task Run()
+        {
             api.OnServerTime += ApiOnServerTime;
             api.OnShowMessage += ApiOnOnShowMessage;
             api.OnFolderChanged += ApiOnFolderChanged;
             await api.ConnectToServer();
-            
-            var task = Task.Factory.StartNew(() => RunCommandLoop(), TaskCreationOptions.LongRunning);
 
-            //while (true) Thread.Sleep(1000);
+            var task = Task.Factory.StartNew(() => RunCommandLoop(), TaskCreationOptions.LongRunning);            
         }
 
         private static void ApiOnFolderChanged(object sender, FileSystemEvent e)
