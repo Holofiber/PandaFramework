@@ -51,23 +51,23 @@ namespace DummyClient
                 {
                     var command = System.Console.ReadLine();
 
-                    if (command == "time")
-                    {
-                        api.SendServerTimeRequest();
-                        continue;
-                    }
+                    //if (command == "time")
+                    //{
+                    //    api.SendServerTimeRequest();
+                    //    continue;
+                    //}
 
-                    if (command == "ping")
-                    {
-                        api.SendServerPing();
-                        continue;
-                    }
+                    //if (command == "ping")
+                    //{
+                    //    api.SendServerPing();
+                    //    continue;
+                    //}
 
-                    if (command.StartsWith("subscribe") )
-                    {
-                        var tokens = command.Split(" ");
-                        api.SubscribeFolderChange(tokens[1]);                        
-                    }
+                    //if (command.StartsWith("subscribe") )
+                    //{
+                    //    var tokens = command.Split(" ");
+                    //    api.SubscribeFolderChange(tokens[1]);                        
+                    //}
                 }
             }
             catch (Exception e)

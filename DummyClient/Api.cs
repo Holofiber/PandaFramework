@@ -4,7 +4,6 @@ using System.Drawing;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Timers;
-using DummyServer;
 using Library;
 using Newtonsoft.Json;
 using WebSocket4Net;
@@ -17,9 +16,11 @@ namespace DummyClient
         private WebSocket webSocket;
         public bool IsConnected;
         private Timer aTimer;
+        private Guid userID;
 
         public Api()
         {
+            userID = Guid.NewGuid();
            // webSocket = new WebSocket("ws://127.0.0.1:8181");
         }
 
@@ -33,6 +34,7 @@ namespace DummyClient
             webSocket.Closed += Ws_Closed;
             webSocket.DataReceived += Ws_DataReceived;
             webSocket.Error += Ws_Error;
+
 
 
             return await webSocket.OpenAsync();           
@@ -66,12 +68,12 @@ namespace DummyClient
             Colorful.Console.WriteLine("closed", Color.Red);
 
             //excepption if client lose subscribtion 
-            foreach (var taskCompletionSource in _waitForResp)
-            {
-              //  taskCompletionSource.Value.SetException(new Exception());
+            //foreach (var taskCompletionSource in _waitForResp)
+            //{
+            //  //  taskCompletionSource.Value.SetException(new Exception());
 
-            }
-            _waitForResp.Clear();
+            //}
+            //_waitForResp.Clear();
 
             TryToReconnect();
         }
@@ -81,8 +83,8 @@ namespace DummyClient
             SetTimer();
         }
        
-            static Dictionary<Guid, TaskCompletionSource<FileSystemEvent>> _waitForResp =
-                new Dictionary<Guid, TaskCompletionSource<FileSystemEvent>>();
+          /*  static Dictionary<Guid, TaskCompletionSource<FileSystemEvent>> _waitForResp =
+                new Dictionary<Guid, TaskCompletionSource<FileSystemEvent>>();*/
         
 
         private void Ws_MessageReceived(object sender, MessageReceivedEventArgs e)
@@ -156,77 +158,75 @@ namespace DummyClient
             OnFolderChanged?.Invoke(this, e);
         }
 
-        public void SendServerTimeRequest()
-        {
-            var request = new Request()
-            {
-                Command = ValidCommand.ServerTime,
-                ID = Guid.NewGuid()
-            };
+        //public void SendServerTimeRequest()
+        //{
+        //    var request = new BaseRequest()
+        //    {
+        //        Command = ValidCommand.ServerTime,
+        //        ID = Guid.NewGuid()
+        //    };
 
-            SendMessage(request);
-        }
+        //    SendMessage(request);
+        //}
 
 
-        public Task<FileSystemEvent> SubscribeFolderChange(string path)
-        {
-            var request = new Request()
-            {
-                Command = ValidCommand.WaitForFolderChange,
-                Message = $@"C:\{path}",
-                ID = Guid.NewGuid()
-            };
-            
+        /* public Task<FileSystemEvent> SubscribeFolderChange(string path)
+         {
+             var request = new Request()
+             {
+                 Command = ValidCommand.WaitForFolderChange,
+                 Message = $@"C:\{path}",
+                 ID = userID
+             };
 
-            var tcs = new TaskCompletionSource<FileSystemEvent>();
-            System.Console.WriteLine(request.ID);
-            _waitForResp.Add(request.ID, tcs);
-            SendMessage(request);          
 
-            return tcs.Task;
-        }
+             var tcs = new TaskCompletionSource<FileSystemEvent>();
+             System.Console.WriteLine(request.ID);
+             _waitForResp.Add(request.ID, tcs);
+             SendMessage(request);          
+
+             return tcs.Task;
+         }*/
 
         public void FolderChanged(Request r)
         {
-           Console.WriteLine($"{r.ID} {r.Message}", Color.Green);
+            Console.WriteLine($"{r.ID} {r.Message}", Color.Green);
         }
 
 
 
-        public void DivNumbers(int a, int b)
-        {
-            var message = $"div {a} {b}";
-            var request = new Request()
-            {
-                Command = ValidCommand.Division,
-                Message = message
-            };
+        //public void DivNumbers(int a, int b)
+        //{
+        //    var message = $"div {a} {b}";
+        //    var request = new Request()
+        //    {
+        //        Command = ValidCommand.Division,
+        //        Message = message
+        //    };
 
-            SendMessage(request);
-        }
+        //    SendMessage(request);
+        //}
 
         private Guid GetUniqeId()
         {
             return Guid.NewGuid();
         }
 
-        private void SendMessage(Request request)
-        {
-            if (request.ID==null)
-            request.ID = GetUniqeId();
+        public void SendMessage(IBaseMessage request)
+        {    
 
             var json = JsonConvert.SerializeObject(request);
             webSocket.Send(json);
         }
 
-        public void SendServerPing()
-        {
-            var request = new Request()
-            {
-                Command = ValidCommand.Ping,
-            };
+        //public void SendServerPing()
+        //{
+        //    var request = new Request()
+        //    {
+        //        Command = ValidCommand.Ping,
+        //    };
 
-            SendMessage(request);
-        }
+        //    SendMessage(request);
+        //}
     }
 }
