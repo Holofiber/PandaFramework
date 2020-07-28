@@ -25,6 +25,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CalcClient", "CalcClient\Ca
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FolderWatcher.Domain", "FolderWatcher.Domain\FolderWatcher.Domain.csproj", "{441C9E74-F3AD-4B45-A635-D1A59074662A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FolderWatcherServerTest", "FolderWatcherServerTest\FolderWatcherServerTest.csproj", "{8E356AFD-3074-47B4-8EBE-2488D31A0259}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -63,6 +65,10 @@ Global
 		{441C9E74-F3AD-4B45-A635-D1A59074662A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{441C9E74-F3AD-4B45-A635-D1A59074662A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{441C9E74-F3AD-4B45-A635-D1A59074662A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8E356AFD-3074-47B4-8EBE-2488D31A0259}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8E356AFD-3074-47B4-8EBE-2488D31A0259}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8E356AFD-3074-47B4-8EBE-2488D31A0259}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8E356AFD-3074-47B4-8EBE-2488D31A0259}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -76,6 +82,7 @@ Global
 		{7DE9F91F-8017-45ED-B770-7BD7F8F8C223} = {FD1C4A7E-2936-4E27-A980-EF0792B60F12}
 		{D0A9E7E7-C54E-4AF5-9165-2FC1AD36B8D6} = {5D812CA1-B3BF-484C-A34D-2F0712B97380}
 		{441C9E74-F3AD-4B45-A635-D1A59074662A} = {FD1C4A7E-2936-4E27-A980-EF0792B60F12}
+		{8E356AFD-3074-47B4-8EBE-2488D31A0259} = {FD1C4A7E-2936-4E27-A980-EF0792B60F12}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {01588530-9460-4386-8FD6-0CDF08CC815C}

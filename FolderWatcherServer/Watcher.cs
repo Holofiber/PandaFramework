@@ -1,17 +1,11 @@
-﻿using Library;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using System.Drawing;
-using System.Text;
 using System.IO;
 using System.Linq;
-using Fleck;
-using Console = Colorful.Console;
-using DummyClient;
 using DummyServer;
-using System.Net;
-using FolderWatcherClient.Requests;
+using Newtonsoft.Json.Linq;
+using FolderWatcher.Domain;
 
 namespace FolderWatcherServer
 {
@@ -28,10 +22,6 @@ namespace FolderWatcherServer
            // StartServer server = new StartServer();
             server.RunServer();
             server.OnConnected += _OnConnected;
-
-           
-            
-           
         }
 
         private void _OnConnected(object sender, string e)
@@ -42,9 +32,14 @@ namespace FolderWatcherServer
         }
 
         public void HandleMessage(object sender, string message)
-        {
-            System.Console.WriteLine(message);
-            var request = JsonConvert.DeserializeObject<SubscribeRequest>(message);
+        {            
+            Console.WriteLine(message);
+            var json = JObject.Parse(message);
+            string typeName = (string)json["TypeName"];
+
+            Type type = BaseMessageTypes.GetBaseMessageTypes().FirstOrDefault(x => x.Name.Equals(typeName));
+
+            var request = JsonConvert.DeserializeObject(message, type);
            // System.Console.WriteLine($"[{request.ID}] [{request.Command}] ", Color.Cornsilk);
 
 
