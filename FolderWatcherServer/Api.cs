@@ -1,0 +1,6 @@
+﻿namespace FolderWatcherServer
+{
+    class Api
+    {
+    }
+}

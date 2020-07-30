@@ -5,7 +5,7 @@ namespace Calculator
 {
     class CalcApi
     {
-        Api api = new Api();
+        PandaBaseApi api = new PandaBaseApi();
         public void DivNumbers(int a, int b)
         {
             var message = $"div {a} {b}";

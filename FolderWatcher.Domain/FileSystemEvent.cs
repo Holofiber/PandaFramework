@@ -1,6 +1,6 @@
 ﻿using System.IO;
 
-namespace Library
+namespace FolderWatcher.Domain
 {
     public struct FileSystemEvent
     {

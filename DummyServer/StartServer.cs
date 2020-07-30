@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Threading;
 using DummyClient;
 using Fleck;
 
@@ -19,9 +18,7 @@ namespace DummyServer
                 var clientConnection = new ClientConnection(socket);                
                 clientConnectionsList.Add(clientConnection);
                 OnConnected?.Invoke(this, "new connection");
-            });
-
-            
+            });            
         }
     }
 }

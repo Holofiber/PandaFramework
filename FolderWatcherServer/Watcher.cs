@@ -6,6 +6,9 @@ using System.Linq;
 using DummyServer;
 using Newtonsoft.Json.Linq;
 using FolderWatcher.Domain;
+using FolderWatcherClient.Requests;
+using Library;
+using PandaLibrary;
 
 namespace FolderWatcherServer
 {
@@ -20,13 +23,14 @@ namespace FolderWatcherServer
         {
             
            // StartServer server = new StartServer();
-            server.RunServer();
+            server.RunServer();            
             server.OnConnected += _OnConnected;
         }
 
+        DummyClient.ClientConnection connection;
         private void _OnConnected(object sender, string e)
         {
-            var connection = server.clientConnectionsList.FirstOrDefault();
+            connection = server.clientConnectionsList.FirstOrDefault();
             if (connection != null)
             connection.OnMessage += HandleMessage;
         }
@@ -44,14 +48,12 @@ namespace FolderWatcherServer
 
 
             
-           /* else if (request.Command == ValidCommand.WaitForFolderChange)
+            if (type == typeof(SubscribeRequest))
             {
-                string path = request.Message;
-                var id = request.ID;
+                SubscribeRequest subscribeRequest = (SubscribeRequest)request;
+                string path = subscribeRequest.Path;
+                var id = subscribeRequest.ID;
                 SubscribedCatalog.Add(id, path);
-
-
-
 
                 watcher.Path = path;
                 watcher.NotifyFilter = NotifyFilters.LastAccess | NotifyFilters.LastWrite
@@ -66,7 +68,7 @@ namespace FolderWatcherServer
                 watcher.EnableRaisingEvents = true;
 
             }
-            else if (request.Command == ValidCommand.Division)
+            /*else if (request.Command == ValidCommand.Division)
             {
                 try
                 {
@@ -84,8 +86,8 @@ namespace FolderWatcherServer
                 {
                     Socket.Send(e.Message + "\n " + e.StackTrace);
                 }
-            }
-            else
+            }*/
+           /* else
             {
                 var r = new Request()
                 {
@@ -95,7 +97,7 @@ namespace FolderWatcherServer
             }*/
         }
 
-        /*private void SomeHapens(FileSystemEventArgs e)
+        private void SomeHapens(FileSystemEventArgs e)
         {
             List<Guid> listOfGuids = new List<Guid>();
             foreach (var data in SubscribedCatalog)
@@ -108,33 +110,30 @@ namespace FolderWatcherServer
 
             if (listOfGuids.Any())
             {
-
-
                 foreach (var guid in listOfGuids)
                 {
-                    FileSystemEvent fileSystemEvent = new FileSystemEvent
+                    FolderChangesResponse folderChangesResponse = new FolderChangesResponse
                     {
+                        
                         FileName = e.Name,
                         FullPath = e.FullPath,
-                        ChangesType = e.ChangeType
+                        ChangesType = e.ChangeType.ToString()
                     };
 
-
-
-                    Socket.Send(JsonConvert.SerializeObject(fileSystemEvent));
+                    connection.SendMessage(JsonConvert.SerializeObject(folderChangesResponse));
                 }
             }
 
-        }*/
+        }
 
-        //private void OnCreated(object sender, FileSystemEventArgs e)
-        //{
-        //    SomeHapens(e);
-        //}
+        private void OnCreated(object sender, FileSystemEventArgs e)
+        {
+            SomeHapens(e);
+        }
 
-        //private void OnChanged(object sender, FileSystemEventArgs e)
-        //{
-        //    SomeHapens(e);
-        //}
+        private void OnChanged(object sender, FileSystemEventArgs e)
+        {
+            SomeHapens(e);
+        }
     }
 }

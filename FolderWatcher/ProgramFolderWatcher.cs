@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using DummyClient;
+using FolderWatcher.Domain;
 using Library;
 
 namespace FolderWatcher
@@ -51,9 +52,9 @@ namespace FolderWatcher
             }
         }
 
-        private static void _OnFolderChanged(object sender, FileSystemEvent e)
+        private static void _OnFolderChanged(object sender, FolderChangesResponse e)
         {
-            Console.WriteLine("Folder was changed with result" + e);
+            Console.WriteLine("Folder was changed with result" + e.ChangesType);
         }
 
         static Dictionary<Guid, TaskCompletionSource<FileSystemEvent>> _waitForResponse = new Dictionary<Guid, TaskCompletionSource<FileSystemEvent>>();

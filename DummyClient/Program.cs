@@ -1,5 +1,4 @@
-﻿using Library;
-using System;
+﻿using System;
 using System.Drawing;
 using System.Threading;
 using System.Threading.Tasks;
@@ -9,39 +8,24 @@ namespace DummyClient
 {
     internal class Program
     {
-        private static readonly Api api = new Api();
+        private static readonly PandaBaseApi api = new PandaBaseApi();
+
 
         public static void Main(string[] args)
         {
             ConsoleHelper.SetWindowPosition(0, 510, 979, 512);
             Console.Title = "Client";
 
-            Task task = Run();
+            Run();
 
             while (true) Thread.Sleep(1000);
         }
 
-        private static async Task Run()
-        {
-            api.OnServerTime += ApiOnServerTime;
-            api.OnShowMessage += ApiOnOnShowMessage;
-            api.OnFolderChanged += ApiOnFolderChanged;
-            await api.ConnectToServer();
+        private static void Run()
+        {           
 
-            var task = Task.Factory.StartNew(() => RunCommandLoop(), TaskCreationOptions.LongRunning);            
-        }
-
-        private static void ApiOnFolderChanged(object sender, FileSystemEvent e)
-        {
-            Console.WriteLine("Folder was changed with result" + e);
-           // throw new NotImplementedException();
-        }
-
-        private static void ApiOnOnShowMessage(object sender, string e)
-        {
-            Console.WriteLine("Unknown message from server:", Color.Red);
-            Console.Write(e, Color.AliceBlue);
-        }
+            var task = Task.Factory.StartNew(() => RunCommandLoop(), TaskCreationOptions.LongRunning);
+        }       
 
         private static void RunCommandLoop()
         {

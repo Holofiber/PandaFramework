@@ -12,9 +12,7 @@ namespace DummyServer
         static void Main(string[] args)
         {
             ConsoleHelper.SetWindowPosition(0, 0, 979, 512);
-            Console.Title = $"Panda Server {DateTime.Now}";
-           // StartServer startServer = new StartServer();
-           // startServer.RunServer();
+            Console.Title = $"Panda Server {DateTime.Now}";           
 
             while (true)
             {

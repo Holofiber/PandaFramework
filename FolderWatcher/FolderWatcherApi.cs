@@ -1,13 +1,12 @@
 ﻿using DummyClient;
 using Library;
-using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using WebSocket4Net;
-using System.Drawing;
 using Console = Colorful.Console;
 using FolderWatcherClient.Requests;
+using FolderWatcher.Domain;
 
 namespace FolderWatcher
 {
@@ -17,11 +16,26 @@ namespace FolderWatcher
         static Dictionary<Guid, TaskCompletionSource<FileSystemEvent>> _waitForResp =
                new Dictionary<Guid, TaskCompletionSource<FileSystemEvent>>();
 
-        Api pandaApi = new Api();
+        PandaBaseApi PandaApi;
+        private static string Host = "ws://127.0.0.1:";
+        private static int Port = 8181;
+
+        public FolderWatcherApi()
+        {
+            PandaApi = new PandaBaseApi();
+            PandaApi.OnMessageReceived += _OnMessageRecieved;
+            PandaApi.OnClose += _OnClose;
+        }
+
+        private void _OnClose(object sender, EventArgs e)
+        {
+            throw new NotImplementedException();
+        }
+
         private void Ws_MessageReceived(object sender, MessageReceivedEventArgs e)
         {
 
-            var response = JsonConvert.DeserializeObject<Request>(e.Message);            
+           /* var response = JsonConvert.DeserializeObject<Request>(e.Message);            
 
             if (response.Command == ValidCommand.FolderChanged)
             {
@@ -31,12 +45,17 @@ namespace FolderWatcher
             else
             {
                 DoShowMessage(e.Message);
-            }
+            }*/
         }
 
         internal void ConnectToServer()
+        {            
+           Task task = PandaApi.ConnectToServer(Host, Port);
+        }
+
+        private void _OnMessageRecieved(object sender, IBaseMessage e)
         {
-           Task task = pandaApi.ConnectToServer();
+            throw new NotImplementedException();
         }
 
         private void DoShowMessage(object message)
@@ -58,22 +77,19 @@ namespace FolderWatcher
             var tcs = new TaskCompletionSource<FileSystemEvent>();
             System.Console.WriteLine(request.ID);
             _waitForResp.Add(request.ID, tcs);
-            pandaApi.SendMessage(request);
+            PandaApi.SendMessage(request);            
 
             return tcs.Task;
         }
         //Unsubscribe
         //OnFolederChange 
-        public event EventHandler<FileSystemEvent> OnFolderChanged;
+        public event EventHandler<FolderChangesResponse> OnFolderChanged;
 
-        protected virtual void DoOnFolderChanged(FileSystemEvent e)
+        protected virtual void DoOnFolderChanged(FolderChangesResponse e)
         {
             OnFolderChanged?.Invoke(this, e);
         }
 
-        public void FolderChanged(Request r)
-        {
-            Colorful.Console.WriteLine($"{r.ID} {r.Message}", Color.Green);
-        }
+        
     }
 }
